@@ -19,22 +19,33 @@ namespace EmployeePermissionApi.Controllers
         [HttpPost("request")]
         public async Task<IActionResult> RequestPermission([FromBody] RequestPermissionCommand command)
         {
-            var permissionId = await _mediator.Send(command);
-            return Ok(new { PermissionId = permissionId });
+            try
+            {
+                var permissionId = await _mediator.Send(command);
+                return Ok(new { PermissionId = permissionId });
+            }
+            catch(Exception sxm) { return BadRequest(sxm.Message); }
         }
 
         [HttpPut("edit")]
         public async Task<IActionResult> EditPermission([FromBody] EditPermissionCommand command)
         {
+            try { 
             await _mediator.Send(command);
             return NoContent();
+            }
+            catch (Exception sxm) { return BadRequest(sxm.Message); }
+
         }
 
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetPermissions(int employeeId)
         {
+            try { 
             var permissions = await _mediator.Send(new GetPermissionsQuery { EmployeeId = employeeId });
             return Ok(permissions);
+            }
+            catch (Exception sxm) { return BadRequest(sxm.Message); }
         }
     }
 }
