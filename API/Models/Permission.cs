@@ -1,4 +1,6 @@
-﻿namespace EmployeePermissionApi.Models
+﻿using System.Text.Json.Serialization;
+
+namespace EmployeePermissionApi.Models
 {
     public enum PermissionType
     {
@@ -13,6 +15,7 @@
         public int Id { get; set; }
         public PermissionType Type { get; set; }
         public int EmployeeId { get; set; }
+        [JsonIgnore]
         public Employee Employee { get; set; }
     }
 }

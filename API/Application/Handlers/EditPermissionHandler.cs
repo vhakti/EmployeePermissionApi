@@ -8,19 +8,21 @@ namespace EmployeePermissionApi.Application.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<EditPermissionHandler> _logger;
+        private readonly IElasticSearchClient _elasticClient;
 
-        public EditPermissionHandler(IUnitOfWork unitOfWork, ILogger<EditPermissionHandler> logger)
+        public EditPermissionHandler(IUnitOfWork unitOfWork, ILogger<EditPermissionHandler> logger, IElasticSearchClient elasticClient)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _elasticClient = elasticClient;
         }
 
         public async Task Handle(EditPermissionCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                var permission = await _unitOfWork.EmployeeRepository.GetPermissionsAsync(0) // Dummy employeeId for simplicity
-                    .ContinueWith(t => t.Result.FirstOrDefault(p => p.Id == request.PermissionId));
+                var permission = await _unitOfWork.EmployeeRepository.GetPermissionByIdAsync(request.PermissionId);
+                   
                 if (permission == null)
                 {
                     _logger.LogError("Permission with ID {PermissionId} not found", request.PermissionId);
@@ -30,6 +32,9 @@ namespace EmployeePermissionApi.Application.Handlers
                 permission.Type = request.NewPermissionType;
                 await _unitOfWork.EmployeeRepository.UpdatePermissionAsync(permission);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Indexar en Elasticsearch
+                await _elasticClient.IndexPermissionAsync(permission);
 
                 _logger.LogInformation("Permission {PermissionId} updated to {NewPermissionType}", request.PermissionId, request.NewPermissionType);
             }

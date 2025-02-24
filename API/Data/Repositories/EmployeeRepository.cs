@@ -14,6 +14,7 @@ namespace EmployeePermissionApi.Data.Repositories
 
         public async Task<Employee> GetByIdAsync(int id) => await _context.Employees.Include(e => e.Permissions).FirstOrDefaultAsync(e => e.Id == id);
         public async Task<List<Permission>> GetPermissionsAsync(int employeeId) => await _context.Permissions.Where(p => p.EmployeeId == employeeId).ToListAsync();
+        public async Task<Permission> GetPermissionByIdAsync(int id) => await _context.Permissions.Where(p => p.Id == id).FirstOrDefaultAsync();
         public async Task AddPermissionAsync(Permission permission) => await _context.Permissions.AddAsync(permission);
         public async Task UpdatePermissionAsync(Permission permission) => _context.Permissions.Update(permission);
     }

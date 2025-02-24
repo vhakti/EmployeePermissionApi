@@ -8,5 +8,6 @@ namespace EmployeePermissionApi.Data.Repositories
         Task<List<Permission>> GetPermissionsAsync(int employeeId);
         Task AddPermissionAsync(Permission permission);
         Task UpdatePermissionAsync(Permission permission);
+        Task<Permission> GetPermissionByIdAsync(int id);
     }
 }

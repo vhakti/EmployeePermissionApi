@@ -9,11 +9,13 @@ namespace EmployeePermissionApi.Application.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RequestPermissionHandler> _logger;
+        private readonly IElasticSearchClient _elasticClient;
 
-        public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger)
+        public RequestPermissionHandler(IUnitOfWork unitOfWork, ILogger<RequestPermissionHandler> logger, IElasticSearchClient elasticClient)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _elasticClient = elasticClient;
         }
 
         public async Task<int> Handle(RequestPermissionCommand request, CancellationToken cancellationToken)
@@ -30,6 +32,10 @@ namespace EmployeePermissionApi.Application.Handlers
                 var permission = new Permission { EmployeeId = request.EmployeeId, Type = request.PermissionType };
                 await _unitOfWork.EmployeeRepository.AddPermissionAsync(permission);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Indaxar en Elasticsearch..
+                await _elasticClient.IndexPermissionAsync(permission);
+
 
                 _logger.LogInformation("Permission {PermissionType} added to Employee {EmployeeId}", request.PermissionType, request.EmployeeId);
                 return permission.Id;
