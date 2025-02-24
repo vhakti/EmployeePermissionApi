@@ -1,3 +1,4 @@
+using EmployeePermissionApi.Application.brokers;
 using EmployeePermissionApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -28,6 +29,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddScoped<IElasticSearchClient, ElasticSearchClient>();
+
+builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("KafkaSettings"));
+builder.Services.AddSingleton<KafkaProducerService>();
 
 var app = builder.Build();
 
